@@ -1,0 +1,16 @@
+{
+  "name": "2018-midterms",
+  "version": "0.1.0",
+  "description": "A small node app to cache API results for my story, \"2018 Midterms: Races to Watch\"",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Peter Andringa",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.2",
+    "got": "^8.0.0"
+  }
+}

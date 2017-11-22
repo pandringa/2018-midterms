@@ -1,0 +1,86 @@
+@import "fonts";
+@import "semantic/semantic";
+@import "icons";
+
+@lightBlue: #D4DFEF;
+@darkBlue: #2B6690;
+
+.headline-container, .text-container {
+  max-width: 640px;
+  margin: 5rem auto;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.5em;
+}
+
+h5 {
+  margin: 2rem auto;
+  text-align: center;
+}
+
+h5 a {
+  text-transform: uppercase;
+  color: #333;
+}
+
+h5 .light {
+  padding-left: 1rem;
+  opacity: 0.8;
+}
+
+p {
+  line-height: 2.5rem;
+  font-weight: 400;
+}
+
+.interactive-container, .table-container {
+  font-family: 'Franklin', 'Helvetica', sans-serif;
+  font-size: 1rem;
+  position: relative;
+}
+
+.ui.button {
+  font-family: 'Franklin', 'Helvetica', sans-serif;
+  font-weight: 700;
+}
+
+.ui.button:focus:not(:hover) {
+  background-color: #E0E1E2;
+}
+
+.ui.toggle.buttons .active.button {
+  background-color: @darkBlue !important;
+}
+
+.datamaps-subunit.selected {
+  fill: #666 !important;
+  stroke: #666 !important;
+}
+
+footer {
+  position: relative;
+  font-family: 'Franklin', 'Helvetica', sans-serif;
+  font-weight: 500;
+  color: #555;
+  text-align: left;
+  margin: 2rem 0 1rem;
+  padding: 1rem 0;
+  font-size: 1rem;
+}
+
+footer:before {
+  content: ' ';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5rem;
+  height: 0.25rem;
+  background-color: #555;
+}
+
+@media only screen and (max-width: 768px) {
+  
+}
