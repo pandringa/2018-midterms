@@ -11,6 +11,9 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.2",
-    "got": "^8.0.0"
+    "got": "^8.0.0",
+    "pg": "^7.4.0",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^4.22.12"
   }
 }
