@@ -1,5 +1,5 @@
 const got = require('got');
-const config = require('./config.json')[process.env.NODE_ENV || "development"];
+const config = require('./../config.json')[process.env.NODE_ENV || "development"];
 
 module.exports = new function ProPublica(){
   this.getState = (state, tries) => {
@@ -15,8 +15,7 @@ module.exports = new function ProPublica(){
       return res.body.results;
     }).catch(e => {
       if(tries < 5){
-        console.log('TRYING AGAIN', tries);
-        setTimeout(() => self.getState(state, tries+1), 500)
+        return self.getState(state, tries+1);
       }
     });
   };
@@ -32,9 +31,9 @@ module.exports = new function ProPublica(){
       return res.body.results[0];
     }).catch(e => {
       if(tries < 5){
-        console.log('TRYING AGAIN', tries);
         return self.getCandidate(id, tries+1);
       }
+      return false;
     });
   };
 }

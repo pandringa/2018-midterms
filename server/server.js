@@ -1,8 +1,8 @@
 const express = require('express');
 
-const ProPublica = require('./ProPublica');
-const PredictIt = require('./PredictIt');
-const Ratings = require('./Ratings');
+const ProPublica = require('./services/ProPublica');
+const PredictIt = require('./services/PredictIt');
+const Ratings = require('./services/Ratings');
 const config = require('./config.json')[process.env.NODE_ENV || "development"];
 const db = require('./models.js');
 const app = express();
@@ -25,27 +25,7 @@ app.get('/markets/:state', (req, res) => {
   }
 });
 app.get('/predictions/:predictor', (req, res) => {
-  Ratings.getPrediction(req.params.predictor)
-    .then( data => {
-      var promises = [];
-      for(var key of Object.keys(data)){
-        const [state, district] = key.split('-');
-        var updates = {};
-        if(req.params.predictor == 'all'){
-
-        }else{
-          updates[req.params.predictor+'_rating'] = data[key]
-        }
-        console.log(state, district, updates);
-        db.Race.update(updates, {
-          where: {
-            state: state,
-            district: parseInt(district)
-          }
-        });
-      }
-      res.send(data); 
-    })
+  
 });
 app.get('/races/:state/:district', (req, res) => {
   res.send('To be implemented');
@@ -55,7 +35,7 @@ app.get('/races/:state/:district', (req, res) => {
   // Load data from ProPublica
 app.get('/', (req, res) => {
   Promise.all(
-    Object.keys(require('./states.json').names)
+    Object.keys(require('./data/states.json').names)
       .map(state => db.loadState(state))
   ).then(result => {
     console.log('FINISHED FIRST');
