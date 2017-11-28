@@ -8,6 +8,13 @@ const db = {
   sequelize: new Sequelize(config.db_uri)
 };
 
+// Method from https://hackernoon.com/functional-javascript-resolving-promises-sequentially-7aac18c4431e 
+Promise.prototype.serial = funcs => {
+  return funcs.reduce((promise, func) =>
+    promise.then(result => func().then(Array.prototype.concat.bind(result))),
+    Promise.resolve([]))
+}
+
 db.Update = db.sequelize.define('updates', {
   success: Sequelize.BOOLEAN,
   error: Sequelize.TEXT
@@ -19,7 +26,11 @@ db.Race = db.sequelize.define('race', {
   state: Sequelize.STRING,
   district: Sequelize.INTEGER, // 0 if senate, district # if house
   total_contrib: Sequelize.INTEGER,
-  total_disbursements: Sequelize.INTEGER
+  total_disbursements: Sequelize.INTEGER,
+  cook_rating: Sequelize.INTEGER,
+  inside_rating: Sequelize.INTEGER,
+  crystal_rating: Sequelize.INTEGER,
+  incumbent_party: Sequelize.STRING
 }, {
   underscored: true
 });
@@ -109,7 +120,8 @@ db.loadState = function(state){
     ])
   }).then( ([state_races, raceDict]) => {
     return Promise.all(
-    state_races.filter(d => d.candidate).map(race_data => {
+    state_races.filter(d => d && d.candidate && d.district)
+    .map(race_data => {
       const [race_uri, state, race] = race_data.district.match(/\/races\/([A-Z]{2})\/([\w\/]*)\.json/);
       const district = race === 'senate' ? 0 : parseInt(race.match(/house\/(\d*)/)[1]);
       return Promise.all([
@@ -119,6 +131,13 @@ db.loadState = function(state){
           total_disbursements: 0
         })
       ]).then( ([candidate_data, race]) => {
+        var race_updates = {
+          total_contrib: race.total_contrib + candidate_data.total_contributions,
+          total_disbursements: race.total_disbursements + candidate_data.total_disbursements
+        };
+        if(candidate_data.status == 'I') 
+          race_updates.incumbent_party = candidate_data.party.substring(0,1);
+        
         return Promise.all([
           db.Candidate.create({
             race_id: race.id,
@@ -131,10 +150,7 @@ db.loadState = function(state){
             total_contrib: candidate_data.total_contributions,
             disbursements: candidate_data.total_disbursements,
           }),
-          race.update({
-            total_contrib: race.total_contrib + candidate_data.total_contributions,
-            total_disbursements: race.total_disbursements + candidate_data.total_disbursements
-          })
+          race.update(race_updates)
         ]);
       }).catch(e => {
         throw new Error(`Error in inner chain: ${e.stack}`);

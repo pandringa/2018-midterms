@@ -26,7 +26,26 @@ app.get('/markets/:state', (req, res) => {
 });
 app.get('/predictions/:predictor', (req, res) => {
   Ratings.getPrediction(req.params.predictor)
-    .then( data => res.send(data) )
+    .then( data => {
+      var promises = [];
+      for(var key of Object.keys(data)){
+        const [state, district] = key.split('-');
+        var updates = {};
+        if(req.params.predictor == 'all'){
+
+        }else{
+          updates[req.params.predictor+'_rating'] = data[key]
+        }
+        console.log(state, district, updates);
+        db.Race.update(updates, {
+          where: {
+            state: state,
+            district: parseInt(district)
+          }
+        });
+      }
+      res.send(data); 
+    })
 });
 app.get('/races/:state/:district', (req, res) => {
   res.send('To be implemented');
@@ -39,7 +58,8 @@ app.get('/', (req, res) => {
     Object.keys(require('./states.json').names)
       .map(state => db.loadState(state))
   ).then(result => {
-    return res.send(result);
+    console.log('FINISHED FIRST');
+    return result;
   });
 });
 
