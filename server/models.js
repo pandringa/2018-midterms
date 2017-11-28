@@ -2,6 +2,7 @@
 const Sequelize = require("sequelize");
 const got = require('got');
 const ProPublica = require('./ProPublica.js');
+const nameify = require('./nameify.js')
 const config = require('./config.json')[process.env.NODE_ENV || "development"];
 const db = {
   sequelize: new Sequelize(config.db_uri)
@@ -43,10 +44,9 @@ db.Candidate = db.sequelize.define('candidate', {
 
   setterMethods: {
     full_name(val) {
-      var [first, last] = val.indexOf(',') > 0 ? val.split(', ').reverse() : val.split(' ');
-      [first,last] = [first,last].map(n => n.substring(0,1).toUpperCase() + n.substring(1).toLowerCase());
-      this.setDataValue('first_name', first);
-      this.setDataValue('last_name', last);
+      var name = nameify(val);
+      this.setDataValue('first_name', name.first + (name.middle ? ' ' + name.middle : '') );
+      this.setDataValue('last_name', name.last);
     },
   }
 });
@@ -73,20 +73,21 @@ db.loadAll = function(){
 }
 
 db.loadState = function(state){
-  return got(`https://api.propublica.org/campaign-finance/v1/${config.year}/races/${state}.json`, {
-    headers: {
-      'X-API-Key': config.campaign_finance_key
-    },
-    json: true
-  }).then( res => { // Build Races
+  return ProPublica.getState(state)
+  .then( state_races => { // Build Races
     var races = {};
-    for(var race_data of res.body.results){
-      const [race_uri, state, race] = race_data.district.match(/\/races\/([A-Z]{2})\/([\w\/]*)\.json/);
-      const district = race === 'senate' ? 0 : parseInt(race.match(/house\/(\d*)/)[1]);
+    for(var race_data of state_races){
+      var district;
+      if(race_data.district == null){
+        district = 1;
+      }else{
+        const race = race_data.district.match(/\/races\/[A-Z]{2}\/([\w\/]*)\.json/)[1];
+        district = race === 'senate' ? 0 : parseInt(race.match(/house\/(\d*)/)[1]);
+      }
       races[state+'-'+district] = {state: state, district: district}
     }
     return Promise.all([
-      res,
+      state_races,
       Promise.all(Object.values(races).map(race => {
         return db.Race.findOrCreate({where: {
           state: race.state,
@@ -94,7 +95,7 @@ db.loadState = function(state){
         }})
       }))
     ]);
-  }).then( ([res, races]) => { // Build Candidates
+  }).then( ([state_races, races]) => { // Build Candidates
     var raceDict = {};
     var raceIds = [];
     for(const [race, created] of races){
@@ -102,40 +103,37 @@ db.loadState = function(state){
       raceIds.push(race.id);
     }
     return Promise.all([
-      res,
+      state_races,
       raceDict,
       db.Candidate.destroy({where: {race_id: raceIds}})
     ])
-  }).then( ([res, raceDict]) => {
+  }).then( ([state_races, raceDict]) => {
     return Promise.all(
-    res.body.results.filter(d => d.candidate).map(race_data => {
+    state_races.filter(d => d.candidate).map(race_data => {
       const [race_uri, state, race] = race_data.district.match(/\/races\/([A-Z]{2})\/([\w\/]*)\.json/);
       const district = race === 'senate' ? 0 : parseInt(race.match(/house\/(\d*)/)[1]);
       return Promise.all([
-        got(`https://api.propublica.org/campaign-finance/v1/${config.year}${race_data.candidate.relative_uri}`, {
-          headers: {'X-API-Key': config.campaign_finance_key},
-          json: true
-        }),
+        ProPublica.getCandidate(race_data.candidate.id),
         raceDict[state+'-'+district].update({
           total_contrib: 0,
           total_disbursements: 0
         })
-      ]).then( ([res, race]) => {
+      ]).then( ([candidate_data, race]) => {
         return Promise.all([
           db.Candidate.create({
             race_id: race.id,
-            fec_id: res.body.results[0].id,
-            full_name: res.body.results[0].name,
-            party: res.body.results[0].party.substring(0,1),
-            status: res.body.results[0].status,
-            individual_contrib: res.body.results[0].total_from_individuals,
-            pac_contrib: res.body.results[0].total_from_pacs,
-            total_contrib: res.body.results[0].total_contributions,
-            disbursements: res.body.results[0].total_disbursements,
+            fec_id: candidate_data.id,
+            full_name: candidate_data.name,
+            party: candidate_data.party.substring(0,1),
+            status: candidate_data.status,
+            individual_contrib: candidate_data.total_from_individuals,
+            pac_contrib: candidate_data.total_from_pacs,
+            total_contrib: candidate_data.total_contributions,
+            disbursements: candidate_data.total_disbursements,
           }),
           race.update({
-            total_contrib: race.total_contrib + res.body.results[0].total_contributions,
-            total_disbursements: race.total_disbursements + res.body.results[0].total_disbursements
+            total_contrib: race.total_contrib + candidate_data.total_contributions,
+            total_disbursements: race.total_disbursements + candidate_data.total_disbursements
           })
         ]);
       }).catch(e => {
