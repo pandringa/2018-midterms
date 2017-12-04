@@ -58868,15 +58868,16 @@ p {
   pointer-events: none;
 }
 .interactive-map .district:hover,
-.interactive-map .state:hover {
+.interactive-map .state:hover,
+.interactive-map .district.active {
   fill: #2B6690;
 }
 .interactive-map .zoom-out {
   display: inline-block;
   display: absolute;
   z-index: 2;
-  top: 25px;
-  left: 25px;
+  top: 50px;
+  left: 50px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.5s;

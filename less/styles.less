@@ -85,7 +85,7 @@ p {
     
   }
 
-  .district:hover, .state:hover {
+  .district:hover, .state:hover, .district.active {
     fill: @darkBlue;
   }
 
@@ -93,8 +93,8 @@ p {
     display: inline-block;
     display: absolute;
     z-index: 2;
-    top: 25px;
-    left: 25px;
+    top: 50px;
+    left: 50px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s;
