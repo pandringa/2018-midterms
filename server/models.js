@@ -24,12 +24,12 @@ db.Update = db.sequelize.define('updates', {
 db.Race = db.sequelize.define('race', {
   state: Sequelize.STRING,
   district: Sequelize.INTEGER, // 0 if senate, district # if house
-  total_contrib: Sequelize.INTEGER,
-  total_disbursements: Sequelize.INTEGER,
+  total_receipts: {type: Sequelize.INTEGER, allowNull: false, defaultValue: 0 },
+  total_disbursements: {type: Sequelize.INTEGER, allowNull: false, defaultValue: 0 },
   cook_rating: Sequelize.INTEGER,
   inside_rating: Sequelize.INTEGER,
   crystal_rating: Sequelize.INTEGER,
-  incumbent_party: Sequelize.STRING
+  news_total: {type: Sequelize.INTEGER, allowNull: false, defaultValue: 0 },
 }, {
   underscored: true
 });
@@ -40,10 +40,9 @@ db.Candidate = db.sequelize.define('candidate', {
   last_name: Sequelize.STRING,
   party: Sequelize.STRING,
   status: Sequelize.STRING,
-  individual_contrib: Sequelize.FLOAT,
-  pac_contrib: Sequelize.FLOAT,
-  total_contrib: Sequelize.FLOAT,
-  disbursements: Sequelize.FLOAT
+  receipts: Sequelize.INTEGER,
+  disbursements: Sequelize.INTEGER,
+  news_hits: {type: Sequelize.INTEGER, allowNull: false, defaultValue: 0 },
 }, {
   underscored: true,
   getterMethods: {

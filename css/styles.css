@@ -58834,24 +58834,6 @@ p {
   font-size: 1rem;
   position: relative;
 }
-.table-container .loader {
-  top: 8rem;
-}
-.map-container {
-  width: 100%;
-  position: relative;
-  margin: 1rem 0;
-  min-height: 2rem;
-}
-.map-container .loader {
-  top: 2rem;
-}
-.map-container .current-year {
-  position: absolute;
-  font-size: 3rem;
-  left: 1rem;
-  bottom: 1rem;
-}
 .ui.button {
   font-family: 'Franklin', 'Helvetica', sans-serif;
   font-weight: 700;
@@ -58862,66 +58844,49 @@ p {
 .ui.toggle.buttons .active.button {
   background-color: #2B6690 !important;
 }
-.buttons-container > .ui.dropdown {
-  float: right;
+.interactive-map .background {
+  fill: none;
+  pointer-events: all;
 }
-.datamaps-subunit.selected {
-  fill: #666 !important;
-  stroke: #666 !important;
-}
-.timeline-container {
-  display: flex;
-  flex-flow: row wrap;
-}
-.timeline-container .timeline {
-  flex-grow: 2;
-  position: relative;
-  background: #E0E1E2;
-  border-radius: 3px;
-  overflow: hidden;
-  height: 2.5rem;
-  margin-left: 1rem;
+.interactive-map .state,
+.interactive-map .district {
+  fill: #aaa;
+  stroke: #fff;
+  stroke-width: .5px;
   cursor: pointer;
+  transition: fill 0.75s, stroke 0.75s;
 }
-.timeline-container .timeline-buttons {
-  flex-grow: 0;
+.interactive-map #states .state.active {
+  display: none;
 }
-.timeline-container .timeline .bar {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  padding-left: 5px;
-  background: #2B6690;
-  transition: padding-left 0.1s;
+.interactive-map #state-borders {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
 }
-.timeline-years {
-  flex: 0 0 100%;
-  height: 2rem;
-  position: relative;
-  left: 9rem;
+.interactive-map .district:hover,
+.interactive-map .state:hover {
+  fill: #2B6690;
 }
-.timeline-years .year {
-  position: absolute;
-  top: 0;
+.interactive-map .zoom-out {
   display: inline-block;
-  font-family: 'Franklin', 'Helvetica', sans-serif;
-  font-weight: 400;
-  font-size: 1rem;
+  display: absolute;
+  z-index: 2;
+  top: 25px;
+  left: 25px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
 }
-.dropdown-cell {
-  position: relative;
-  overflow-y: visible !important;
-  pointer-events: auto !important;
-  box-shadow: none !important;
+.interactive-map.zoomed .state {
+  fill: #eee;
 }
-.dropdown-cell .ui.dropdown {
-  position: absolute;
-  border: none;
-  top: 1px;
-  left: 1px;
-  width: calc(98%);
-  height: calc(98%);
+.interactive-map.zoomed .zoom-out {
+  opacity: 1;
+  pointer-events: auto;
 }
 footer {
   position: relative;
@@ -58942,30 +58907,4 @@ footer:before {
   width: 5rem;
   height: 0.25rem;
   background-color: #555;
-}
-@media only screen and (max-width: 768px) {
-  .timeline-years {
-    left: 0;
-  }
-  .timeline-container .timeline-buttons {
-    flex-basis: 100%;
-    order: 3;
-  }
-  .timeline-container .timeline {
-    flex-basis: 100%;
-    margin-left: 0;
-    margin-bottom: 1rem;
-  }
-  .buttons-container > .buttons {
-    width: 100%;
-    margin: 0.5rem 0;
-  }
-  .buttons-container > .ui.dropdown {
-    float: none;
-    width: 100%;
-    margin: 0.5rem 0;
-  }
-  .map-container .current-year {
-    font-size: 2.5rem;
-  }
 }
