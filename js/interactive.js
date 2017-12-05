@@ -42,7 +42,7 @@ function ElectionMap(element) {
 
   // Set up Map
   const projection = d3.geo.albersUsa()
-    .scale(1070)
+    .scale(width * 1.385)
     .translate([width / 2, height / 2]);
   const path = d3.geo.path()
     .projection(projection);
