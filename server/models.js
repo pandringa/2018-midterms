@@ -31,7 +31,8 @@ db.Race = db.sequelize.define('race', {
   crystal_rating: Sequelize.INTEGER,
   news_total: {type: Sequelize.INTEGER, allowNull: false, defaultValue: 0 },
 }, {
-  underscored: true
+  underscored: true,
+  indexes: [{ fields: ['state', 'district'], unique: true }]
 });
 
 db.Candidate = db.sequelize.define('candidate', {
@@ -50,14 +51,14 @@ db.Candidate = db.sequelize.define('candidate', {
       return this.first_name + ' ' + this.last_name
     }
   },
-
   setterMethods: {
     full_name(val) {
       var name = nameify(val);
       this.setDataValue('first_name', name.first);
       this.setDataValue('last_name', name.last);
     },
-  }
+  },
+  indexes: [{ fields: ['race_id'] }]
 });
 
 // Build associations

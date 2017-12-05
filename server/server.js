@@ -1,5 +1,4 @@
 const express = require('express');
-
 const ProPublica = require('./services/ProPublica');
 const PredictIt = require('./services/PredictIt');
 const Ratings = require('./services/Ratings');
@@ -8,35 +7,32 @@ const config = require('./config.json')[process.env.NODE_ENV || "development"];
 const db = require('./models.js');
 const app = express();
 
-// For Request:
-  // Read Data from DB
-  // If data > 1 day old, queue new data
-app.get('/finance/:state', (req, res) => {
-  res.send('To be implemented');
-});
-app.get('/tweets/:state', (req, res) => {
-  res.send('To be implemented');
-});
-app.get('/markets/:state', (req, res) => {
-  if(req.params.state == 'all'){
-    PredictIt.getSenate()
-      .then( data => res.send(data) );
-  }else{
-    res.send(req.params.state);
-  }
-});
-app.get('/predictions/:predictor', (req, res) => {
-  
-});
-app.get('/races/:state/:district', (req, res) => {
-  res.send('To be implemented');
-});
+// Load specific race details
+app.get('/race/:race', (req, res) => {
+   res.header('Access-Control-Allow-Origin', config.allowed_origin);
+  const [state, district] = req.params.race.split('-');
+  db.Race.find({
+    where: {
+      state: state.toUpperCase(),
+      district: district ? parseInt(district) : 0
+    },
+    include: ['candidates']
+  }).then(race => {
+    if(!race){
+      res.status(404);
+      return res.send('Race not found');
+    }
 
-app
+    return res.json({
+      state_name: StateNames[race.state],
+      ...race.dataValues
+    });
+  });
+});
 
 // Load all races
 app.get('/races', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', config.allowed_origin);
   db.Race.findAll({
     include: [{
       model: db.Candidate,
@@ -59,8 +55,6 @@ app.get('/races', (req, res) => {
     })
   });
 });
-
-// CRON JOB - Load Data from ProPublica once a week
 
 const port = process.env.PORT || config.port || 3000;
 app.listen(port, () => console.log(`Server listening on port ${port}...`))

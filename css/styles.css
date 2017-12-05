@@ -58869,7 +58869,7 @@ p {
 .interactive-map.senate .state {
   fill: #aaa;
 }
-.interactive-map #states .state.active {
+.interactive-map #states .state.zoom {
   display: none;
 }
 .interactive-map #state-borders {
@@ -58880,6 +58880,9 @@ p {
   stroke-linecap: round;
   pointer-events: none;
 }
+.interactive-map .state.active,
+.interactive-map .state.active:hover,
+.interactive-map .state.active.hover,
 .interactive-map .district.active,
 .interactive-map .district.active:hover,
 .interactive-map .district.active.hover {
@@ -58902,31 +58905,37 @@ p {
   opacity: 1;
   pointer-events: auto;
 }
-.interactive-list .list-title {
+.interactive-sidebar {
+  overflow: hidden;
+}
+.interactive-sidebar .interactive-list {
+  transition: transform 0.5s;
+}
+.interactive-sidebar .interactive-list .title {
   display: inline-block;
   float: left;
 }
-.interactive-list .list-toggle {
+.interactive-sidebar .list-toggle {
   display: inline-block;
   float: right;
 }
-.interactive-list .ui.secondary.menu {
+.interactive-sidebar .ui.secondary.menu {
   clear: both;
   font-size: 0.8rem;
 }
-.interactive-list .ui.secondary.menu .item {
+.interactive-sidebar .ui.secondary.menu .item {
   display: block;
   padding-left: 0;
   padding-right: 0;
   text-align: center;
   flex-grow: 1;
 }
-.interactive-list .race-list {
+.interactive-sidebar .ui.list {
   clear: both;
   width: 100%;
   overflow-y: scroll;
 }
-.interactive-list .race-list .race {
+.interactive-sidebar .ui.list .item {
   display: flex !important;
   flex-flow: row nowrap;
   align-items: center;
@@ -58934,35 +58943,73 @@ p {
   padding: 0.5rem 5px;
   cursor: pointer;
 }
-.interactive-list .race-list .race.hover,
-.interactive-list .race-list .race.active {
+.interactive-sidebar .ui.list .item.hover,
+.interactive-sidebar .ui.list .item.active {
   background: #d5e0e8;
 }
-.interactive-list .race-list .race .district-label {
+.interactive-sidebar .ui.list .item .district-label {
   flex-grow: 0;
   width: 4rem;
 }
-.interactive-list .race-list .race .race-content {
+.interactive-sidebar .ui.list .item .content {
   width: auto;
   flex-grow: 1;
 }
-.interactive-list .race-list .race .race-content .name {
+.interactive-sidebar .ui.list .item .content .name {
   font-weight: bold;
   font-size: 1.2rem;
 }
-.interactive-list .race-list .race .race-content .name.red {
+.interactive-sidebar .ui.list .item .content .name.red {
   color: #D44C5F;
 }
-.interactive-list .race-list .race .race-content .name.blue {
+.interactive-sidebar .ui.list .item .content .name.blue {
   color: #6DA9F0;
 }
-.interactive-list .race-list .race .race-content .status {
+.interactive-sidebar .ui.list .item .content .status {
   color: #555;
   font-size: 0.8rem;
 }
-.interactive-list .race-list .race .datapoint {
+.interactive-sidebar .ui.list .item .datapoint {
   flex-grow: 0;
-  margin-left: auto;
+  margin-right: 1rem;
+}
+.interactive-sidebar .ui.list .item i.icon {
+  flex-grow: 0;
+  font-size: 2rem;
+  width: 1.5rem;
+  line-height: 100%;
+  transition: transform 0.3s;
+}
+.interactive-sidebar .ui.list .item:hover i.icon {
+  transform: translateX(2px);
+}
+.interactive-sidebar .ui.list .item:active i.icon {
+  transform: translateX(5px);
+}
+.interactive-sidebar .ui.table tr:last-of-type {
+  font-weight: bold;
+}
+.interactive-sidebar .interactive-detail {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: calc(98%);
+  transform: translateX(100%);
+  transition: transform 0.5s;
+  text-align: left;
+}
+.interactive-sidebar .interactive-detail .button.back {
+  display: block;
+  margin-bottom: 1rem;
+}
+.interactive-sidebar .interactive-detail .ui.list {
+  overflow: hidden;
+}
+.interactive-sidebar.show-detail .interactive-list {
+  transform: translateX(calc(-110%));
+}
+.interactive-sidebar.show-detail .interactive-detail {
+  transform: none;
 }
 footer {
   position: relative;

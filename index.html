@@ -21,8 +21,8 @@
          <div class="ui active centered loader"></div>
       </div>
       <div class="interactive-sidebar ui column five wide">
-        <div class="interactive-list slide">
-          <h2 class="list-title">All Races</h2>
+        <div class="interactive-list">
+          <h2 class="title">All Races</h2>
           <div class="list-toggle">
             <div class="ui toggle buttons mini">
               <button class="ui button" data-body="senate">Senate</button>
@@ -31,13 +31,60 @@
           </div>
           <div class="ui pointing secondary menu">
             <a class="item" data-tab="finance">Fundraising</a>
-            <a class="item" data-tab="attention">Attention</a>
+            <a class="item" data-tab="attention">News Hits</a>
             <a class="item" data-tab="prediction">Predictions</a>
           </div>
-          <div class="race-list ui list divided">
+          <div id="race-list" class="ui list divided">
+            <!-- D3 fills in list here -->
           </div>
         </div>
-        <div class="interactive-detail slide">
+        <div class="interactive-detail">
+          <button class="ui basic mini button back">
+            <i class="icon arrow left"></i>
+            Back to list
+          </button>
+          <div class="ui active centered loader"></div>
+          <h2 class="title"></h2>
+          <h3>Totals</h3>
+          <div class="ui two tiny statistics">
+            <div class="statistic finance">
+              <div class="value"></div>
+              <div class="label">Total Fundraising</div>
+            </div>
+            <div class="statistic attention">
+              <div class="value"></div>
+              <div class="label">Total News Hits</div>
+            </div>
+          </div>
+          <h3>Predictions</h3>
+          <table class="ui very compact very basic table">
+            <tbody>
+              <tr class="cook_rating">
+                <td>The Cook Political Report</td>
+                <td>Lean Right</td>
+              </tr>
+              <tr class="inside_rating">
+                <td>Inside Elections</td>
+                <td>Toss-up</td>
+              </tr>
+              <tr class="crystal_rating">
+                <td>Sabato's Crystal Ball</td>
+                <td>Lean Right</td>
+              </tr>
+              <tr class="average">
+                <td>Average</td>
+                <td>Toss-up</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>Candidates</h3>
+          <div class="ui pointing secondary menu">
+            <a class="item active" data-tab="finance">Fundraising</a>
+            <a class="item" data-tab="attention">News Hits</a>
+          </div>
+          <div id="candidate-list" class="ui list divided">
+            <!-- D3 fills in list here -->
+          </div>
         </div>
       </div>
     </div>

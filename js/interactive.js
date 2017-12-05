@@ -1,17 +1,30 @@
 function ElectionMap(element) {
   const self = this;
   const STATE_FP = {};
-  var centered, RACES_DATA;
+  const RATING_INFO = [
+    {text: 'Solid D', color: '#1e4571'},
+    {text: 'Likely D', color: '#265c91'},
+    {text: 'Lean D', color: '#347abe'},
+    {text: 'Tilt D', color: '#70a1d1'},
+    {text: 'Toss Up', color: '#444'},
+    {text: 'Tilt R', color: '#f37381'},
+    {text: 'Lean R', color: '#ee384c'},
+    {text: 'Likely R', color: '#be2839'},
+    {text: 'Solid R', color: '#990012'}
+  ]
 
+  var centered, RACES_DATA;
   const width = $(element).width(),
         height = width / 1.5;
 
-  $('.race-list').attr('style', `max-height: ${height * 0.8}px;`)
+  $('#race-list').attr('style', `max-height: ${height * 0.8}px;`)
 
   // Set up click listeners
   $(element).find('.zoom-out')
     .on('click', e => self.toggleZoom(null));
 
+  $('.interactive-detail .back')
+    .on('click', e => self.hideRace())
 
   $('.interactive-list .toggle.buttons .button')
     .on('click', e => 
@@ -62,12 +75,7 @@ function ElectionMap(element) {
         .attr('d', path)
         .attr('class', 'district')
         .attr('data-race', d => STATE_FP[d.properties.STATEFP]+'-'+parseInt(d.properties.CD115FP))
-        .on('click', d => {
-          const district = STATE_FP[d.properties.STATEFP]+'-'+parseInt(d.properties.CD115FP);
-          g.select('.district.active').classed('active', false);
-          g.select('.district[data-race="'+district+'"]').classed('active', true);
-          self.showRace(district);
-        })
+        .on('click', d => self.showRace(STATE_FP[d.properties.STATEFP]+'-'+parseInt(d.properties.CD115FP)))
         .on('mouseover', d => self.mouseOver(STATE_FP[d.properties.STATEFP]+'-'+parseInt(d.properties.CD115FP)))
         .on('mouseout', d => self.mouseOut(STATE_FP[d.properties.STATEFP]+'-'+parseInt(d.properties.CD115FP)))
     
@@ -136,8 +144,8 @@ function ElectionMap(element) {
     d3.select(element)
       .classed('zoomed', centered);
 
-    g.selectAll('.active' + (d ? ', .state[data-race="'+d.properties.STUSPS+'-0"]' : ''))
-      .classed('active', centered && (d => d === centered))
+    g.selectAll('.zoom' + (d ? ', .state[data-race="'+d.properties.STUSPS+'-0"]' : ''))
+      .classed('zoom', centered && (d => d === centered))
 
     g.transition()
       .duration(750)
@@ -158,18 +166,33 @@ function ElectionMap(element) {
     options.state = options.state || currentOptions.state
 
     if(options.tab == 'prediction'){
-      console.log('prediction')
-      options.sortDisplay = r => r.cook_score;
-      options.sortFn = (a,b) => a-b;
+      options.sortDisplay = r => {
+        const sum = [r.cook_rating, r.inside_rating, r.crystal_rating].reduce((c,i) => c + i, 0);
+        const avg = Math.round(sum / 3.0);
+        return RATING_INFO[avg].text;
+      };
+      options.sortFn = (a,b) => {
+        const [aSum, bSum] = [a,b].map( r =>
+          [r.cook_rating-4, r.inside_rating-4, r.crystal_rating-4].reduce((c,i) => c + i, 0)
+        );
+        return d3.ascending(Math.abs(aSum), Math.abs(bSum));
+      };
+      options.sortDisplayStyle = r => {
+        const sum = [r.cook_rating, r.inside_rating, r.crystal_rating].reduce((c,i) => c + i, 0);
+        const avg = Math.round(sum / 3.0);
+        return `color: ${RATING_INFO[avg].color};`
+      };
+
     } else if(options.tab == 'finance') {
-      console.log('finance')
       options.sortDisplay = r => r.total_receipts > 1000000 ? 
         numeral(r.total_receipts).format('$0.00a') :
         numeral(r.total_receipts).format('$0a');
       options.sortFn = (a, b) => d3.descending(a.total_receipts, b.total_receipts)
+      options.sortDisplayStyle = false;
     } else if(options.tab == 'attention') {
       options.sortDisplay = r => numeral(r.news_total).format('0a');
       options.sortFn = (a, b) => d3.descending(a.news_total, b.news_total)
+      options.sortDisplayStyle = false;
     }
     
     if(options.body != currentOptions.body){
@@ -183,21 +206,27 @@ function ElectionMap(element) {
         .toggleClass('active')
     }
 
+    currentOptions = options;
+
+    self.hideRace();
     $('.interactive-map').removeClass(options.body == 'senate' ? 'house' : 'senate')
     $('.interactive-map').addClass(options.body)
+
 
     // Build list
     var races = RACES_DATA[options.body];
 
-    if(options.state && options.state != 'all')
-      races = races
+    $('.interactive-list .title').text(
+      (options.state && options.state != 'all')
+        ? races.find(r => r.state === options.state).state_name + ' Races'
+        : 'All Races'
+    );
 
-    const list = d3.select('.race-list')
+    const list = d3.select('#race-list')
       .selectAll('div.race')
         .data(races
                 .filter(r => !(options.state && options.state != 'all') || r.state === options.state)
           , r => r.state+'-'+r.district+'-'+options.sortDisplay(r))
-        // .sort(options.sortFn)
 
     // New items
     const race = list.enter().append('div')
@@ -205,10 +234,10 @@ function ElectionMap(element) {
         .attr('data-race', d => d.state+"-"+d.district)
         .on('mouseover', d => self.mouseOver(d.state+"-"+d.district))
         .on('mouseout', d => self.mouseOut(d.state+"-"+d.district))
-        // .sort(options.sortFn)
+        .on('click', d => self.showRace(d.state+"-"+d.district))
 
     const race_content = race.append('div')
-      .attr('class', 'race-content')
+      .attr('class', 'content')
       
     // content.append('div')
     //   .attr('class', d => 'name' + (d.candidates[0].party == 'R' ? ' red' : d.candidates[0].party == 'D' ? ' blue' : ''))
@@ -218,9 +247,9 @@ function ElectionMap(element) {
       .attr('class', 'name')
       .text( r => 
         r.state_name + ' ' + 
-        (r.district > 0 ? 
-          numeral(r.district).format('0o') :
-          "Senate")
+        (r.district > 0
+          ? numeral(r.district).format('0o')
+          : "Senate")
       )
 
     race_content.append('div')
@@ -230,18 +259,123 @@ function ElectionMap(element) {
     race.append('div')
       .attr('class', 'datapoint')
     
+    race.append('i')
+      .attr('class', 'angle right icon')
+
     // Update items
     list
       .sort(options.sortFn)
       .selectAll('.datapoint')
       .text(options.sortDisplay)
-    
+      .attr('style', options.sortDisplayStyle)
+
     // Remove items
     list.exit().remove()
   }
 
   this.showRace = function showRace(district) {
-    console.log(district);
+    $('.interactive-sidebar').addClass('show-detail');
+    $('.interactive-detail .loader').show();
+    
+    $('.interactive-map .active').removeClass('active');
+    $('.interactive-map [data-race="'+district+'"]').addClass('active');
+  
+    d3.json('http://localhost:3000/race/'+district, (error, race) => {
+      if(error) return console.error(error);
+
+      // Update header
+      $('.interactive-detail .title').text(
+        race.state_name + ' ' + 
+        (race.district > 0 ? 
+          numeral(race.district).format('0o') + ' District' :
+          'Senate Race')
+      );
+      $('.interactive-detail .statistic.finance .value').text(
+        numeral(race.total_receipts).format('$0.00a')
+      );
+      $('.interactive-detail .statistic.attention .value').text(
+        numeral(race.news_total).format('0a')
+      );
+
+      var avg = 0;
+      for(var rating of ['cook_rating', 'inside_rating', 'crystal_rating']){
+        avg += race[rating];
+        $(`.${rating} td:last-of-type`)
+          .text(RATING_INFO[race[rating]].text)
+          .attr('style', `color: ${RATING_INFO[race[rating]].color};`);
+      }
+      avg = Math.round(avg / 3.0);
+      $(`.average td:last-of-type`)
+        .text(RATING_INFO[avg].text)
+        .attr('style', `color: ${RATING_INFO[avg].color};`);
+
+
+      // Create candidates
+      const list = d3.select('#candidate-list')
+      .selectAll('div.candidate')
+        .data(race.candidates, c => c.id)
+
+      // New candidates
+      const candidate = list.enter().append('div')
+        .attr('class', 'candidate item')
+
+      const content = candidate.append('div')
+        .attr('class', 'content')
+        
+      content.append('div')
+        .attr('class', c => 'name' + (c.party == 'R' ? ' red' : c.party == 'D' ? ' blue' : ''))
+        .text(c => `${c.first_name} ${c.last_name} (${c.party})`)
+
+      content.append('div')
+        .attr('class', 'status')
+        .text(c => c.status === 'I' ? 'Incumbent' : 'Challenger')
+
+      candidate.append('div')
+        .attr('class', 'datapoint')
+
+      const sortDisplay = {
+        finance: c => c.receipts > 1000000 ? 
+            numeral(c.receipts).format('$0.00a') :
+            numeral(c.receipts).format('$0a'),
+        attention: c => numeral(c.news_hits).format('0a')
+      }
+
+      const sortFn = {
+        finance: (a, b) => d3.descending(a.receipts, b.receipts),
+        attention: (a, b) => d3.descending(a.news_hits, b.news_hits)
+      }
+
+      // Update items
+      function updateSort() {
+        const tab = $('.interactive-detail .secondary.menu .active').data('tab');
+        console.log('sorting list', list);
+        list
+          .sort(sortFn[tab])
+          .selectAll('.datapoint')
+          .text(sortDisplay[tab])
+      }
+      
+      updateSort();
+      
+      // Remove items
+      list.exit().remove();
+
+      $('.interactive-container').attr('style', 'height: '+($('.interactive-detail').height() + 50)+'px');
+      $('.interactive-detail .loader').hide();
+      $('.interactive-detail .menu.secondary .item')
+        .on('click', e => {
+          $('.interactive-detail .menu.secondary .active').removeClass('active');
+          $(e.target).addClass('active');
+          updateSort()
+        });
+    });
+  }
+
+  this.hideRace = function hideRace() {
+    $('.interactive-container').attr('style', '');
+    $(".interactive-sidebar").removeClass('show-detail');
+    $('.interactive-map .active').removeClass('active');
+    $('.interactive-detail .menu.secondary .item').off('click');
   }
 
   this.filterState = function filterState(state) {

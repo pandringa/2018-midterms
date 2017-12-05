@@ -83,7 +83,7 @@ p {
     fill: #aaa;
   }
 
-  #states .state.active {
+  #states .state.zoom {
     display: none;
   }
 
@@ -96,6 +96,7 @@ p {
     pointer-events: none;
   }
 
+  .state.active, .state.active:hover, .state.active.hover,
   .district.active, .district.active:hover, .district.active.hover {
     fill: @darkBlue !important;
   }
@@ -123,14 +124,16 @@ p {
 }
 
 .interactive-sidebar {
-
-}
-
-.interactive-list {
-  .list-title {
-    display: inline-block;
-    float: left;
+  overflow: hidden;
+  
+  .interactive-list {
+    transition: transform 0.5s;
+    .title {
+      display: inline-block;
+      float: left;
+    }
   }
+
   .list-toggle {
     display: inline-block;
     float: right;
@@ -146,12 +149,14 @@ p {
       flex-grow: 1;
     }
   }
-  .race-list {
+
+  .ui.list {
     clear: both;
     width: 100%;
     overflow-y: scroll;
   }
-  .race-list .race {
+  
+  .ui.list .item {
     display: flex !important;
     flex-flow: row nowrap;
     align-items: center;
@@ -167,7 +172,7 @@ p {
       flex-grow: 0;
       width: 4rem;
     }
-    .race-content {
+    .content {
       width: auto;
       flex-grow: 1;
 
@@ -188,7 +193,55 @@ p {
     }
     .datapoint {
       flex-grow: 0;
-      margin-left: auto;
+      margin-right: 1rem;
+    }
+    i.icon {
+      flex-grow: 0;
+      font-size: 2rem;
+      width: 1.5rem;
+      line-height: 100%;
+      transition: transform 0.3s;
+    }
+
+    &:hover i.icon {
+      transform: translateX(2px);
+    }
+    &:active i.icon {
+      transform: translateX(5px);
+    }
+  }
+
+  .ui.table {
+    tr:last-of-type {
+      font-weight: bold;
+    }
+  }
+
+  .interactive-detail {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: calc(100% - 2rem);
+    transform: translateX(100%);
+    transition: transform 0.5s;
+    text-align: left;
+
+    .button.back {
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .ui.list {
+      overflow: hidden;
+    }
+  }
+
+  &.show-detail {
+    .interactive-list {
+      transform: translateX(calc(-110%));
+    }
+    .interactive-detail {
+      transform: none;
     }
   }
 }
