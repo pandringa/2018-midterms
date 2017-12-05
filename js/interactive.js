@@ -106,7 +106,7 @@ function ElectionMap(element) {
   });
 
   // Load election data
-  d3.json('http://localhost:3000/races', (error, raceData) => {
+  d3.json('https://mj487.peterandringa.com/races', (error, raceData) => {
     RACES_DATA = raceData;
     self.renderList({
       body: 'senate',
@@ -283,7 +283,7 @@ function ElectionMap(element) {
     $('.interactive-map .active').removeClass('active');
     $('.interactive-map [data-race="'+district+'"]').addClass('active');
   
-    d3.json('http://localhost:3000/race/'+district, (error, race) => {
+    d3.json('https://mj487.peterandringa.com/race/'+district, (error, race) => {
       if(error) return console.error(error);
 
       // Update header
