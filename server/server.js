@@ -55,7 +55,6 @@ app.get('/races', (req, res) => {
       order: [ [ 'created_at', 'DESC' ]]
     })
   ]).then( ([data, update]) =>{
-    console.log(data)
     const races = data.map( d => {
       return {
         state_name: StateNames[d.state],
