@@ -464,7 +464,7 @@ function ElectionMap(element) {
   }
 
   this.hideRace = function hideRace() {
-    $('.interactive-container').attr('style', '');
+    $('.interactive-sidebar').attr('style', '');
     $(".interactive-sidebar").removeClass('show-detail');
     $('.interactive-map .active').removeClass('active');
     $('.interactive-detail .menu.secondary .item').off('click');
