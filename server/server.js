@@ -3,6 +3,7 @@ const express = require('express');
 const ProPublica = require('./services/ProPublica');
 const PredictIt = require('./services/PredictIt');
 const Ratings = require('./services/Ratings');
+const StateNames = require('./data/states.json').names;
 const config = require('./config.json')[process.env.NODE_ENV || "development"];
 const db = require('./models.js');
 const app = express();
@@ -31,15 +32,31 @@ app.get('/races/:state/:district', (req, res) => {
   res.send('To be implemented');
 });
 
-// If DB is empty
-  // Load data from ProPublica
-app.get('/', (req, res) => {
-  Promise.all(
-    Object.keys(require('./data/states.json').names)
-      .map(state => db.loadState(state))
-  ).then(result => {
-    console.log('FINISHED FIRST');
-    return result;
+app
+
+// Load all races
+app.get('/races', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  db.Race.findAll({
+    include: [{
+      model: db.Candidate,
+      where: { 
+        status: "I"        
+      }
+    }]
+  })
+  .then(data =>{
+    const races = data.map( d => {
+      return {
+        state_name: StateNames[d.state],
+        ...d.dataValues
+      }
+    });
+
+    return res.send({
+      senate: races.filter(r => r.district == 0),
+      house: races.filter(r => r.district > 0)
+    })
   });
 });
 

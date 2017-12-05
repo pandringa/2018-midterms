@@ -54,7 +54,7 @@ db.Candidate = db.sequelize.define('candidate', {
   setterMethods: {
     full_name(val) {
       var name = nameify(val);
-      this.setDataValue('first_name', name.first + (name.middle ? ' ' + name.middle : '') );
+      this.setDataValue('first_name', name.first);
       this.setDataValue('last_name', name.last);
     },
   }

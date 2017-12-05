@@ -61,11 +61,26 @@ p {
   }
 
   .state, .district {
-    fill: #aaa;
+    fill: rgba(0,0,0,0);
     stroke: #fff;
-    stroke-width: .5px;
+    stroke-width: 0.25px;
     cursor: pointer;
-    transition: fill 0.75s, stroke 0.75s;
+    transition: stroke 0.75s;
+    &.hover {
+      fill: rgb(213,224,232) !important;
+    }
+  }
+
+  .district {
+    fill: #aaa;
+  }
+  .state {
+    &.hover:hover {
+      fill: rgba(213,224,232, 0.4) !important;
+    }
+  }
+  &.senate .state {
+    fill: #aaa;
   }
 
   #states .state.active {
@@ -81,20 +96,16 @@ p {
     pointer-events: none;
   }
 
-  .district {
-    
-  }
-
-  .district:hover, .state:hover, .district.active {
-    fill: @darkBlue;
+  .district.active, .district.active:hover, .district.active.hover {
+    fill: @darkBlue !important;
   }
 
   .zoom-out {
     display: inline-block;
-    display: absolute;
+    position: absolute;
     z-index: 2;
-    top: 50px;
-    left: 50px;
+    top: 20px;
+    left: 20px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s;
@@ -107,6 +118,77 @@ p {
     .zoom-out {
       opacity: 1;
       pointer-events: auto;
+    }
+  }
+}
+
+.interactive-sidebar {
+
+}
+
+.interactive-list {
+  .list-title {
+    display: inline-block;
+    float: left;
+  }
+  .list-toggle {
+    display: inline-block;
+    float: right;
+  }
+  .ui.secondary.menu {
+    clear: both;
+    font-size: 0.8rem;
+    .item {
+      display: block;
+      padding-left: 0;
+      padding-right: 0;
+      text-align: center;
+      flex-grow: 1;
+    }
+  }
+  .race-list {
+    clear: both;
+    width: 100%;
+    overflow-y: scroll;
+  }
+  .race-list .race {
+    display: flex !important;
+    flex-flow: row nowrap;
+    align-items: center;
+    width: 100%;
+    padding: 0.5rem 5px;
+    cursor: pointer;
+    
+    &.hover, &.active {
+      background: rgb(213,224,232);
+    }
+
+    .district-label {
+      flex-grow: 0;
+      width: 4rem;
+    }
+    .race-content {
+      width: auto;
+      flex-grow: 1;
+
+      .name {
+        font-weight: bold;
+        font-size: 1.2rem;
+        &.red {
+          color: #D44C5F;
+        }
+        &.blue {
+          color: #6DA9F0;
+        }
+      }
+      .status {
+        color: #555;
+        font-size: 0.8rem;
+      }
+    }
+    .datapoint {
+      flex-grow: 0;
+      margin-left: auto;
     }
   }
 }

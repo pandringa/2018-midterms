@@ -58850,11 +58850,24 @@ p {
 }
 .interactive-map .state,
 .interactive-map .district {
-  fill: #aaa;
+  fill: rgba(0, 0, 0, 0);
   stroke: #fff;
-  stroke-width: .5px;
+  stroke-width: 0.25px;
   cursor: pointer;
-  transition: fill 0.75s, stroke 0.75s;
+  transition: stroke 0.75s;
+}
+.interactive-map .state.hover,
+.interactive-map .district.hover {
+  fill: #d5e0e8 !important;
+}
+.interactive-map .district {
+  fill: #aaa;
+}
+.interactive-map .state.hover:hover {
+  fill: rgba(213, 224, 232, 0.4) !important;
+}
+.interactive-map.senate .state {
+  fill: #aaa;
 }
 .interactive-map #states .state.active {
   display: none;
@@ -58867,17 +58880,17 @@ p {
   stroke-linecap: round;
   pointer-events: none;
 }
-.interactive-map .district:hover,
-.interactive-map .state:hover,
-.interactive-map .district.active {
-  fill: #2B6690;
+.interactive-map .district.active,
+.interactive-map .district.active:hover,
+.interactive-map .district.active.hover {
+  fill: #2B6690 !important;
 }
 .interactive-map .zoom-out {
   display: inline-block;
-  display: absolute;
+  position: absolute;
   z-index: 2;
-  top: 50px;
-  left: 50px;
+  top: 20px;
+  left: 20px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.5s;
@@ -58888,6 +58901,68 @@ p {
 .interactive-map.zoomed .zoom-out {
   opacity: 1;
   pointer-events: auto;
+}
+.interactive-list .list-title {
+  display: inline-block;
+  float: left;
+}
+.interactive-list .list-toggle {
+  display: inline-block;
+  float: right;
+}
+.interactive-list .ui.secondary.menu {
+  clear: both;
+  font-size: 0.8rem;
+}
+.interactive-list .ui.secondary.menu .item {
+  display: block;
+  padding-left: 0;
+  padding-right: 0;
+  text-align: center;
+  flex-grow: 1;
+}
+.interactive-list .race-list {
+  clear: both;
+  width: 100%;
+  overflow-y: scroll;
+}
+.interactive-list .race-list .race {
+  display: flex !important;
+  flex-flow: row nowrap;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem 5px;
+  cursor: pointer;
+}
+.interactive-list .race-list .race.hover,
+.interactive-list .race-list .race.active {
+  background: #d5e0e8;
+}
+.interactive-list .race-list .race .district-label {
+  flex-grow: 0;
+  width: 4rem;
+}
+.interactive-list .race-list .race .race-content {
+  width: auto;
+  flex-grow: 1;
+}
+.interactive-list .race-list .race .race-content .name {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+.interactive-list .race-list .race .race-content .name.red {
+  color: #D44C5F;
+}
+.interactive-list .race-list .race .race-content .name.blue {
+  color: #6DA9F0;
+}
+.interactive-list .race-list .race .race-content .status {
+  color: #555;
+  font-size: 0.8rem;
+}
+.interactive-list .race-list .race .datapoint {
+  flex-grow: 0;
+  margin-left: auto;
 }
 footer {
   position: relative;
