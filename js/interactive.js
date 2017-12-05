@@ -103,13 +103,12 @@ function ElectionMap(element) {
       .selectAll('path')
         .data(
           topojson.feature(us, us.objects.districts).features
-          .map(f => {
-            return {
-              'state': STATE_FP[f.properties.STATEFP],
-              'district': 0 == parseInt(f.properties.CD115FP) ? 1 : parseInt(f.properties.CD115FP),
-              ...f
-            }
-          })
+          .map(f => 
+            Object.assign({}, f, {
+              state: STATE_FP[f.properties.STATEFP],
+              district: 0 == parseInt(f.properties.CD115FP) ? 1 : parseInt(f.properties.CD115FP)
+            })
+          )
         )
       .enter().append('path')
         .attr('d', path)
@@ -124,13 +123,12 @@ function ElectionMap(element) {
       .attr('id', 'states')
       .selectAll('path')
         .data(topojson.feature(us, us.objects.states).features
-          .map(f => {
-            return {
+          .map(f => 
+            Object.assign({}, f, {
               state: f.properties.STUSPS,
-              district: 0,
-              ...f
-            }
-          })
+              district: 0
+            })
+          )
         )
       .enter().append('path')
         .attr('d', path)
