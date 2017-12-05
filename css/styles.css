@@ -58861,16 +58861,89 @@ p {
 }
 .interactive-map .state.hover,
 .interactive-map .district.hover {
-  fill: #d5e0e8 !important;
+  fill: #ccc !important;
 }
 .interactive-map .district {
-  fill: #aaa;
+  fill: #ccc;
 }
 .interactive-map .state.hover:hover {
   fill: rgba(213, 224, 232, 0.4) !important;
 }
-.interactive-map.senate .state {
-  fill: #aaa;
+.interactive-map.senate .state,
+.interactive-map.house .district {
+  fill: #666;
+}
+.interactive-map.senate .state[data-color="-8"],
+.interactive-map.house .district[data-color="-8"] {
+  fill: #990012;
+}
+.interactive-map.senate .state[data-color="-7"],
+.interactive-map.house .district[data-color="-7"] {
+  fill: #991323;
+}
+.interactive-map.senate .state[data-color="-6"],
+.interactive-map.house .district[data-color="-6"] {
+  fill: #992634;
+}
+.interactive-map.senate .state[data-color="-5"],
+.interactive-map.house .district[data-color="-5"] {
+  fill: #993945;
+}
+.interactive-map.senate .state[data-color="-4"],
+.interactive-map.house .district[data-color="-4"] {
+  fill: #994D56;
+}
+.interactive-map.senate .state[data-color="-3"],
+.interactive-map.house .district[data-color="-3"] {
+  fill: #996066;
+}
+.interactive-map.senate .state[data-color="-2"],
+.interactive-map.house .district[data-color="-2"] {
+  fill: #997377;
+}
+.interactive-map.senate .state[data-color="-1"],
+.interactive-map.house .district[data-color="-1"] {
+  fill: #998688;
+}
+.interactive-map.senate .state[data-color="0"],
+.interactive-map.house .district[data-color="0"] {
+  fill: #999999;
+}
+.interactive-map.senate .state[data-color="0a"],
+.interactive-map.house .district[data-color="0a"] {
+  fill: #5A2D73;
+}
+.interactive-map.senate .state[data-color="1"],
+.interactive-map.house .district[data-color="1"] {
+  fill: #8A8F94;
+}
+.interactive-map.senate .state[data-color="2"],
+.interactive-map.house .district[data-color="2"] {
+  fill: #7A848F;
+}
+.interactive-map.senate .state[data-color="3"],
+.interactive-map.house .district[data-color="3"] {
+  fill: #6B7A8A;
+}
+.interactive-map.senate .state[data-color="4"],
+.interactive-map.house .district[data-color="4"] {
+  fill: #5C6F85;
+}
+.interactive-map.senate .state[data-color="5"],
+.interactive-map.house .district[data-color="5"] {
+  fill: #4C6580;
+}
+.interactive-map.senate .state[data-color="6"],
+.interactive-map.house .district[data-color="6"] {
+  fill: #3D5A7B;
+}
+.interactive-map.senate .state[data-color="7"],
+.interactive-map.house .district[data-color="7"] {
+  fill: #2D5076;
+}
+.interactive-map.senate .state[data-color="8"],
+.interactive-map.house .district[data-color="8"] {
+  fill: #1E4571;
 }
 .interactive-map #states .state.zoom {
   display: none;
@@ -58889,7 +58962,7 @@ p {
 .interactive-map .district.active,
 .interactive-map .district.active:hover,
 .interactive-map .district.active.hover {
-  fill: #2B6690 !important;
+  fill: #6EAC64 !important;
 }
 .interactive-map .zoom-out {
   display: inline-block;

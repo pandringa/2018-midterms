@@ -1,12 +1,12 @@
 function ElectionMap(element) {
   const self = this;
-  const STATE_FP = {};
+  const STATE_FP = {}, STATE_NAME = {}, STATE_GEOMETRY = {};
   const RATING_INFO = [
     {text: 'Solid D', color: '#1e4571'},
     {text: 'Likely D', color: '#265c91'},
     {text: 'Lean D', color: '#347abe'},
     {text: 'Tilt D', color: '#70a1d1'},
-    {text: 'Toss Up', color: '#444'},
+    {text: 'Toss Up', color: '#5A2D73'},
     {text: 'Tilt R', color: '#f37381'},
     {text: 'Lean R', color: '#ee384c'},
     {text: 'Likely R', color: '#be2839'},
@@ -14,6 +14,7 @@ function ElectionMap(element) {
   ]
 
   var centered, RACES_DATA;
+  var MAP_COLORED = false;
   const width = $(element).width(),
         height = width / 1.5;
 
@@ -59,41 +60,88 @@ function ElectionMap(element) {
   const g = svg.append('g');
 
   // load geodata
-  d3.json('/2018-midterms/server/geodata/us.json', (error, us) => {
-    if (error) throw error;
+  Promise.all([
+    new Promise( (resolve, reject) =>
+      d3.json('/2018-midterms/server/geodata/us.json', 
+        (e, data) => e ? reject(e) : resolve(data))
+    ).then(geodata => {
+      self.renderMap(geodata);
+      return geodata;
+    }),
+    new Promise( (resolve, reject) => 
+      d3.json('http://localhost:3000/races', 
+        (e, data) => e ? reject(e) : resolve(data))
+    ).then(raceData => {
+      RACES_DATA = raceData;
+      self.renderList({
+        body: 'senate',
+        tab: 'finance'
+      });
+      return raceData;
+    })
+  ]).then(([geodata, raceData]) => {
+    self.colorMap();
 
-    for(var state of us.objects.states.geometries){
+    const d = new Date(Date.parse(raceData.updated));
+    const months = ['JAN', 'FEB', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUG', 'SEPT', 'OCT', 'NOV', 'DEC'];
+    $('#updated').text(`UPDATED: ${months[d.getMonth()]}. ${d.getDate()} ${d.getFullYear()}`)
+  });
+
+  /*****************\
+  *  Helper METHODS *
+  \*****************/
+  this.renderMap = function geoData(us) {
+    for(var state of topojson.feature(us, us.objects.states).features){
       STATE_FP[state.properties.STATEFP] = state.properties.STUSPS;
+      STATE_NAME[state.properties.STUSPS] = state.properties.NAME;
+      STATE_GEOMETRY[state.properties.STUSPS] = state;
     }
 
     // Draw districts
     g.append('g')
       .attr('id', 'districts')
       .selectAll('path')
-        .data(topojson.feature(us, us.objects.districts).features)
+        .data(
+          topojson.feature(us, us.objects.districts).features
+          .map(f => {
+            return {
+              'state': STATE_FP[f.properties.STATEFP],
+              'district': parseInt(f.properties.CD115FP),
+              ...f
+            }
+          })
+        )
       .enter().append('path')
         .attr('d', path)
         .attr('class', 'district')
-        .attr('data-race', d => STATE_FP[d.properties.STATEFP]+'-'+parseInt(d.properties.CD115FP))
-        .on('click', d => self.showRace(STATE_FP[d.properties.STATEFP]+'-'+parseInt(d.properties.CD115FP)))
-        .on('mouseover', d => self.mouseOver(STATE_FP[d.properties.STATEFP]+'-'+parseInt(d.properties.CD115FP)))
-        .on('mouseout', d => self.mouseOut(STATE_FP[d.properties.STATEFP]+'-'+parseInt(d.properties.CD115FP)))
+        .attr('data-race', d => d.state+'-'+d.district)
+        .on('click', d => self.showRace(d.state+'-'+d.district))
+        .on('mouseover', d => self.mouseOver(d.state+'-'+d.district))
+        .on('mouseout', d => self.mouseOut(d.state+'-'+d.district))
     
     // Draw states
     g.append('g')
       .attr('id', 'states')
       .selectAll('path')
-        .data(topojson.feature(us, us.objects.states).features)
+        .data(topojson.feature(us, us.objects.states).features
+          .map(f => {
+            return {
+              state: f.properties.STUSPS,
+              district: 0,
+              ...f
+            }
+          })
+        )
       .enter().append('path')
         .attr('d', path)
         .attr('class', 'state')
-        .attr('data-race', s => s.properties.STUSPS+"-0")
+        .attr('data-race', s => s.state+"-0")
         .on('click', d => {
           self.toggleZoom(d);
-          self.filterState(d.properties.STUSPS);
+          self.filterState(d.state);
         })
-        .on('mouseover', d => self.mouseOver(d.properties.STUSPS+"-0"))
-        .on('mouseout', d => self.mouseOut(d.properties.STUSPS+"-0"))
+        .on('mouseover', d => self.mouseOver(d.state+"-0"))
+        .on('mouseout', d => self.mouseOut(d.state+"-0"))
 
 
     // Draw paths around states
@@ -103,27 +151,63 @@ function ElectionMap(element) {
         .attr('d', path);
 
     $(element).find('.loader').remove();
-  });
+  }
 
-  // Load election data
-  d3.json('https://mj487.peterandringa.com/races', (error, raceData) => {
-    RACES_DATA = raceData;
-    self.renderList({
-      body: 'senate',
-      tab: 'finance'
-    });
-    const d = new Date(Date.parse(raceData.updated));
-    const months = ['JAN', 'FEB', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUG', 'SEPT', 'OCT', 'NOV', 'DEC'];
-    $('#updated').text(`UPDATED: ${months[d.getMonth()]}. ${d.getDate()} ${d.getFullYear()}`)
-    $('#race-list .loader').remove();
-  });
+  this.colorMap = function colorMap(options) {
+    options = options || currentOptions;
+
+    // console.log('Coloring map for '+options.tab);
+
+    MAP_COLORED = true;
+    const getters = {
+      finance: r => r.total_receipts, 
+      attention: r => r.news_total, 
+      prediction: r => {
+        const sum = [r.cook_rating, r.inside_rating, r.crystal_rating].reduce((c,i) => c + i, 0);
+        return Math.round(sum / 3.0);
+      }
+    }
+
+    if(getters[options.tab]){
+      const scales = {
+        senate: d3.scale.quantile()
+          .range(d3.range(9))
+          .domain(RACES_DATA.senate.map(r => getters[options.tab](r))),
+        house: d3.scale.quantile()
+          .range(d3.range(9))
+          .domain(RACES_DATA.house.map(r => getters[options.tab](r)))
+      }
+
+      // Color map tiles
+      const tiles = d3.selectAll('.interactive-map [data-race]')
+        .data([...RACES_DATA.senate, ...RACES_DATA.house], r => {
+          return (r && (r.state != undefined && r.district != undefined) && r.state+'-'+r.district) 
+          }
+        )
+        .attr('data-color', r => {
+          const scale = options.tab == 'prediction'
+                        ? (n => {
+                            const num = (4 - n) * 2
+                            return num + (num == 0 ? 'a' : '')
+                          })
+                        : scales[r.district > 0 ? 'house' : 'senate'];
+          return scale(getters[options.tab](r))
+        });
+
+      tiles.exit()
+        .attr('data-color', '')
+    }else{
+      console.error('No colors for tab '+options.tab);
+    }
+  }
 
   this.toggleZoom = function toggleZoom(d) {
     var x, y, k;
 
     if (d && centered !== d) {
-      [x,y] = path.centroid(d);
-      const [[left, top], [right, bottom]] = path.bounds(d);
+      [x,y] = path.centroid(STATE_GEOMETRY[d.state]);
+
+      const [[left, top], [right, bottom]] = path.bounds(STATE_GEOMETRY[d.state]);
       const widthFactor = (right-left)/width,
             heightFactor = (bottom-top)/height;
       k = Math.min(1/widthFactor, 1/heightFactor);
@@ -131,9 +215,8 @@ function ElectionMap(element) {
 
       self.renderList({
         body: 'house',
-        state: d.properties.STUSPS
+        state: d.state
       });
-
     } else {
       x = width / 2;
       y = height / 2;
@@ -148,7 +231,7 @@ function ElectionMap(element) {
     d3.select(element)
       .classed('zoomed', centered);
 
-    g.selectAll('.zoom' + (d ? ', .state[data-race="'+d.properties.STUSPS+'-0"]' : ''))
+    g.selectAll('.zoom' + (d ? ', .state[data-race="'+d.state+'-0"]' : ''))
       .classed('zoom', centered && (d => d === centered))
 
     g.transition()
@@ -186,7 +269,6 @@ function ElectionMap(element) {
         const avg = Math.round(sum / 3.0);
         return `color: ${RATING_INFO[avg].color};`
       };
-
     } else if(options.tab == 'finance') {
       options.sortDisplay = r => r.total_receipts > 1000000 ? 
         numeral(r.total_receipts).format('$0.00a') :
@@ -207,7 +289,9 @@ function ElectionMap(element) {
     if(options.tab != currentOptions.tab){
       $('.interactive-list .menu.secondary')
         .find('.active, [data-tab="'+options.tab+'"]')
-        .toggleClass('active')
+        .toggleClass('active');
+
+      if(MAP_COLORED) self.colorMap(options);
     }
 
     currentOptions = options;
@@ -216,9 +300,8 @@ function ElectionMap(element) {
     $('.interactive-map').removeClass(options.body == 'senate' ? 'house' : 'senate')
     $('.interactive-map').addClass(options.body)
 
-
     // Build list
-    var races = RACES_DATA[options.body];
+    const races = RACES_DATA[options.body];
 
     $('.interactive-list .title').text(
       (options.state && options.state != 'all')
@@ -243,10 +326,6 @@ function ElectionMap(element) {
     const race_content = race.append('div')
       .attr('class', 'content')
       
-    // content.append('div')
-    //   .attr('class', d => 'name' + (d.candidates[0].party == 'R' ? ' red' : d.candidates[0].party == 'D' ? ' blue' : ''))
-    //   .text(d => `${d.candidates[0].first_name} ${d.candidates[0].last_name} (${d.candidates[0].party})`)
-
     race_content.append('div')
       .attr('class', 'name')
       .text( r => 
@@ -274,7 +353,9 @@ function ElectionMap(element) {
       .attr('style', options.sortDisplayStyle)
 
     // Remove items
-    list.exit().remove()
+    list.exit().remove();
+
+    $('#race-list .loader').remove();
   }
 
   this.showRace = function showRace(district) {
@@ -352,7 +433,6 @@ function ElectionMap(element) {
       // Update items
       function updateSort() {
         const tab = $('.interactive-detail .secondary.menu .active').data('tab');
-        console.log('sorting list', list);
         list
           .sort(sortFn[tab])
           .selectAll('.datapoint')
