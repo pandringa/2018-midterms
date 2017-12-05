@@ -447,6 +447,9 @@ function ElectionMap(element) {
       list.exit().remove();
 
       $('.interactive-container').attr('style', 'height: '+($('.interactive-detail').height() + 50)+'px');
+      if($(window).width() < 768)
+        $('.interactive-sidebar').attr('style', 'height: '+($('.interactive-detail').height() - $('.interactive-map').height())+'px')
+
       $('.interactive-detail .loader').hide();
       $('.interactive-detail .menu.secondary .item')
         .on('click', e => {
