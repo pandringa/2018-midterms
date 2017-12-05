@@ -106,7 +106,7 @@ function ElectionMap(element) {
           .map(f => {
             return {
               'state': STATE_FP[f.properties.STATEFP],
-              'district': parseInt(f.properties.CD115FP),
+              'district': 0 == parseInt(f.properties.CD115FP) ? 1 : parseInt(f.properties.CD115FP),
               ...f
             }
           })
@@ -303,6 +303,8 @@ function ElectionMap(element) {
     // Build list
     const races = RACES_DATA[options.body];
 
+    console.log(RACES_DATA.house.filter(r => r.state == 'WV'))
+
     $('.interactive-list .title').text(
       (options.state && options.state != 'all')
         ? races.find(r => r.state === options.state).state_name + ' Races'
@@ -337,7 +339,9 @@ function ElectionMap(element) {
 
     race_content.append('div')
       .attr('class', 'status')
-      .text(d => `Incumbent: ${d.candidates[0].first_name} ${d.candidates[0].last_name} (${d.candidates[0].party})`)
+      .text(d => d.incumbent 
+        ? `Incumbent: ${d.incumbent.full_name} (${d.incumbent.party})`
+        : 'Open Seat');
 
     race.append('div')
       .attr('class', 'datapoint')
@@ -413,7 +417,7 @@ function ElectionMap(element) {
 
       content.append('div')
         .attr('class', 'status')
-        .text(c => c.status === 'I' ? 'Incumbent' : 'Challenger')
+        .text(c => c.status === 'I' ? 'Incumbent' : c.status === 'O' ? 'Open Seat' : 'Challenger')
 
       candidate.append('div')
         .attr('class', 'datapoint')
