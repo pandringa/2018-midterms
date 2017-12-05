@@ -69,7 +69,7 @@ function ElectionMap(element) {
       return geodata;
     }),
     new Promise( (resolve, reject) => 
-      d3.json('http://localhost:3000/races', 
+      d3.json('https://mj487.peterandringa.com/races', 
         (e, data) => e ? reject(e) : resolve(data))
     ).then(raceData => {
       RACES_DATA = raceData;
