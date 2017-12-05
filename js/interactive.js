@@ -1,5 +1,6 @@
 function ElectionMap(element) {
   const self = this;
+  const MOBILE_BREAKPOINT = 768;
   const STATE_FP = {}, STATE_NAME = {}, STATE_GEOMETRY = {};
   const RATING_INFO = [
     {text: 'Solid D', color: '#1e4571'},
@@ -18,7 +19,10 @@ function ElectionMap(element) {
   const width = $(element).width(),
         height = width / 1.5;
 
-  $('#race-list').attr('style', `max-height: ${height * 0.8}px;`)
+  if($(window).width() > MOBILE_BREAKPOINT)
+    $('#race-list').attr('style', `max-height: ${height * 0.8}px;`)
+  else
+    $('#race-list').attr('style', `max-height: ${$(window).height() - height - 100}px;`)
 
   // Set up click listeners
   $(element).find('.zoom-out')
@@ -446,9 +450,8 @@ function ElectionMap(element) {
       // Remove items
       list.exit().remove();
 
-      $('.interactive-container').attr('style', 'height: '+($('.interactive-detail').height() + 50)+'px');
-      if($(window).width() < 768)
-        $('.interactive-sidebar').attr('style', 'height: '+($('.interactive-detail').height() - $('.interactive-map').height())+'px')
+      
+      $('.interactive-sidebar').attr('style', 'height: '+($('.interactive-detail').height() + 40)+'px');
 
       $('.interactive-detail .loader').hide();
       $('.interactive-detail .menu.secondary .item')
