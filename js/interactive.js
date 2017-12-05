@@ -59,7 +59,7 @@ function ElectionMap(element) {
   const g = svg.append('g');
 
   // load geodata
-  d3.json('server/geodata/us.json', (error, us) => {
+  d3.json('/2018-midterms/server/geodata/us.json', (error, us) => {
     if (error) throw error;
 
     for(var state of us.objects.states.geometries){
