@@ -18,7 +18,8 @@ db.Update = db.sequelize.define('updates', {
   success: Sequelize.BOOLEAN,
   error: Sequelize.TEXT
 }, {
-  underscored: true
+  underscored: true,
+  indexes: [{ fields: ['created_at'] }]
 });
 
 db.Race = db.sequelize.define('race', {

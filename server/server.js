@@ -33,15 +33,19 @@ app.get('/race/:race', (req, res) => {
 // Load all races
 app.get('/races', (req, res) => {
   res.header('Access-Control-Allow-Origin', config.allowed_origin);
-  db.Race.findAll({
-    include: [{
-      model: db.Candidate,
-      where: { 
-        status: "I"        
-      }
-    }]
-  })
-  .then(data =>{
+  Promise.all([
+    db.Race.findAll({
+      include: [{
+        model: db.Candidate,
+        where: { 
+          status: "I"        
+        }
+      }]
+    }),
+    db.Update.findOne({
+      order: [ [ 'created_at', 'DESC' ]]
+    })
+  ]).then( ([data, update]) =>{
     const races = data.map( d => {
       return {
         state_name: StateNames[d.state],
@@ -51,7 +55,8 @@ app.get('/races', (req, res) => {
 
     return res.send({
       senate: races.filter(r => r.district == 0),
-      house: races.filter(r => r.district > 0)
+      house: races.filter(r => r.district > 0),
+      updated: update.created_at
     })
   });
 });

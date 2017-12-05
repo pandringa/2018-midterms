@@ -112,6 +112,9 @@ function ElectionMap(element) {
       body: 'senate',
       tab: 'finance'
     });
+    const d = new Date(Date.parse(raceData.updated));
+    const months = ['JAN', 'FEB', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUG', 'SEPT', 'OCT', 'NOV', 'DEC'];
+    $('#updated').text(`UPDATED: ${months[d.getMonth()]}. ${d.getDate()} ${d.getFullYear()}`)
   });
 
   this.toggleZoom = function toggleZoom(d) {
