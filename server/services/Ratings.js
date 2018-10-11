@@ -67,13 +67,13 @@ module.exports = new function Ratings(){
         var data = {};
         for(var row of document.querySelectorAll('div[id="0"] table.waffle tbody tr:not(:first-of-type)')){
           const state = row.querySelector('td:first-of-type').innerText;
-          const score = row.querySelector('td:nth-of-type(6)').innerText;
+          const score = row.querySelector('td:nth-of-type(7)').innerText;
           data[state] = transformScore(score);
         }
         for(var row of document.querySelectorAll('div[id="2083419594"] table.waffle tbody tr:not(:first-of-type)')){
           const state = row.querySelector('td:first-of-type').innerText;
           var district = row.querySelector('td:nth-of-type(2)').innerText;
-          const score = row.querySelector('td:nth-of-type(7)').innerText;
+          const score = row.querySelector('td:nth-of-type(8)').innerText;
           if(district == 'AL' || parseInt(district) == 0) district = 1;
           data[state+"-"+district] = transformScore(score);
         }

@@ -5,6 +5,7 @@ const db = require('./models');
 const config = require('./config.json')[process.env.NODE_ENV || "development"];
 const state_districts = require('./data/districts.json')
 const state_names = require('./data/states.json').names
+var PQueue = require('p-queue');
 
 const Loader = new function Loader(){
   this.loadRatings = () => {
@@ -35,17 +36,21 @@ const Loader = new function Loader(){
       if(n == 3) return n+"rd";
       return n+"th";
     }
-    return db.Candidate.findAll({ where: {}, include: ['race'] })
+
+    const promiseQueue = new PQueue({concurrency: 1});
+
+    return db.Candidate.findAll({ where: {news_hits: 0, receipts: {$gt: 0}}, include: ['race'] })
       .then(candidates => {
-        return Promise.all(candidates.map(c => {
-            // ("Virginia 10th" OR "VA-10" OR "Barbara Comstock" OR "Julian Modica") AND ("2018" OR "midterm" OR "race")
-            var query = "(";
-            query += `("${state_names[c.race.state]}" AND "${c.race.district > 0 ? formatNum(c.race.district) : 'Senate'}")`
-            query += ` OR "${c.race.state}-${c.race.district}" OR midterm OR (2018 AND (race OR election OR cycle))`
-            query += `) AND (${c.full_name} OR ${c.last_name})`
+        console.log(candidates.length)
+        return promiseQueue.addAll(candidates.map(c => {
+            return () => {
+              //("Virginia 10th" OR "VA-10" OR "Barbara Comstock" OR "Julian Modica") AND ("2018" OR "midterm" OR "race")
+              var query = "";
+              // query += `("${state_names[c.race.state]}" AND "${c.race.district > 0 ? formatNum(c.race.district) : 'Senate'}")`
+              query += `"(${state_names[c.race.state]} OR election OR race OR midterm OR vote) AND ("${c.full_name}" OR "${c.last_name}")`
             
-            return BingNews.countResults(query)
-              .then( num => c.update({ news_hits: num}) );
+              return BingNews.countResults(query).then( num => c.update({ news_hits: num }) );
+            }
         }));
       })
       .then(updated => {

@@ -4,7 +4,7 @@ const config = require('./../config.json')[process.env.NODE_ENV || "development"
 module.exports = new function BingNews(){
   function randomDelay() {
     return new Promise(function(resolve) { 
-       setTimeout(resolve, Math.round(Math.random() * 10000));
+       setTimeout(resolve, 1000);
     });
   }
 
@@ -31,6 +31,7 @@ module.exports = new function BingNews(){
         'Ocp-Apim-Subscription-Key': config.bing_key
       }
     }).catch(e => {
+      console.log(e)
       if(options.retryCount > 5){
         console.log('Out of retries!!');
         return;
