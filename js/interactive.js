@@ -66,14 +66,14 @@ function ElectionMap(element) {
   // load geodata
   Promise.all([
     new Promise( (resolve, reject) =>
-      d3.json('/2018-midterms/server/geodata/us.json', 
+      d3.json('server/geodata/us.json', 
         (e, data) => e ? reject(e) : resolve(data))
     ).then(geodata => {
       self.renderMap(geodata);
       return geodata;
     }),
     new Promise( (resolve, reject) => 
-      d3.json('https://mj487.peterandringa.com/races', 
+      d3.json('archived-data/races.json', 
         (e, data) => e ? reject(e) : resolve(data))
     ).then(raceData => {
       RACES_DATA = raceData;
@@ -371,7 +371,7 @@ function ElectionMap(element) {
     $('.interactive-map .active').removeClass('active');
     $('.interactive-map [data-race="'+district+'"]').addClass('active');
   
-    d3.json('https://mj487.peterandringa.com/race/'+district, (error, race) => {
+    d3.json('archived-data/races/'+district+'.json', (error, race) => {
       if(error) return console.error(error);
 
       // Update header
